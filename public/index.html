@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Key Vault • ระบบคีย์สำหรับ Roblox</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔑</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Mitr:wght@400;500;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0d0e1c; --panel:#161830; --panel2:#1d2040; --line:#2a2e57;
+  --brass:#ffb84d; --ember:#ff785a; --mint:#3ddbb0; --rose:#ff636e; --sky:#6ea8ff;
+  --text:#eceef8; --muted:#8a8fb0;
+  --r-lg:20px; --r-md:12px; --r-sm:8px;
+}
+*{box-sizing:border-box;margin:0}
+html{color-scheme:dark}
+body{
+  min-height:100vh; font-family:'Prompt',system-ui,sans-serif; color:var(--text); background:var(--ink);
+  background-image:
+    radial-gradient(900px 500px at 85% -10%, rgba(255,184,77,.13), transparent 60%),
+    radial-gradient(700px 500px at -10% 110%, rgba(110,168,255,.10), transparent 60%);
+  background-attachment:fixed; line-height:1.55;
+}
+h1,h2,h3{font-family:'Mitr','Prompt',sans-serif;font-weight:500;letter-spacing:.2px}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px;border-radius:6px}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* layout */
+.shell{max-width:1040px;margin:0 auto;padding:28px 20px 80px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px}
+.brand{display:flex;align-items:center;gap:12px;font-family:'Mitr';font-size:20px}
+.brand i{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-style:normal;font-size:20px;
+  background:linear-gradient(135deg,var(--brass),var(--ember));box-shadow:0 6px 22px rgba(255,150,70,.35)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:var(--r-md);font-weight:500;
+  transition:transform .12s, filter .15s, background .15s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--brass),var(--ember));color:#2a1604;font-weight:600}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-ghost{background:var(--panel2);border:1px solid var(--line)}
+.btn-ghost:hover{border-color:#454a86}
+.btn-danger{color:var(--rose);border:1px solid rgba(255,99,110,.35)}
+.btn-danger:hover{background:rgba(255,99,110,.1)}
+.btn-sm{padding:7px 12px;font-size:14px;border-radius:9px}
+.btn[disabled]{opacity:.55;pointer-events:none}
+
+/* panels */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:26px}
+.panel + .panel{margin-top:18px}
+.panel h2{font-size:19px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:14px}
+.field{width:100%;padding:12px 14px;background:var(--ink);border:1px solid var(--line);border-radius:var(--r-md);transition:border-color .15s}
+.field:focus{outline:0;border-color:var(--brass)}
+
+/* login */
+.login{min-height:78vh;display:grid;place-items:center}
+.login .panel{width:100%;max-width:400px;text-align:center;padding:38px 30px}
+.login .brand{justify-content:center;margin-bottom:6px;font-size:26px}
+.login form{display:grid;gap:12px;margin-top:26px}
+.err{color:var(--rose);font-size:14px;min-height:20px}
+
+/* page head */
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.head h1{font-size:30px;line-height:1.2}
+.crumb{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:14px;margin-bottom:10px}
+.crumb:hover{color:var(--text)}
+
+/* api list */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.tag{position:relative;display:block;text-align:left;padding:22px 22px 20px 26px;border-radius:var(--r-lg);
+  background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);
+  transition:border-color .18s, transform .18s}
+.tag:hover{border-color:var(--brass);transform:translateY(-3px)}
+.tag::before{content:"";position:absolute;left:-1px;top:22px;bottom:22px;width:4px;border-radius:0 4px 4px 0;background:var(--brass)}
+.tag h3{font-size:19px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag .id{font-size:12px;color:var(--muted)}
+.tag .meta{display:flex;justify-content:space-between;margin-top:20px;font-size:14px;color:var(--muted)}
+.tag .meta b{color:var(--text);font-weight:600}
+.empty{text-align:center;padding:60px 20px;border:1.5px dashed var(--line);border-radius:var(--r-lg)}
+.empty h3{font-size:20px;margin-bottom:6px}
+.empty .btn{margin-top:20px}
+
+/* stats */
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.stat{padding:10px 16px;border-radius:var(--r-md);background:var(--panel);border:1px solid var(--line);min-width:96px}
+.stat b{display:block;font-family:'Mitr';font-size:22px;font-weight:500;line-height:1.2}
+.stat span{font-size:13px;color:var(--muted)}
+
+/* key generator */
+.gen{display:grid;gap:18px;margin-top:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 16px;border-radius:999px;background:var(--ink);border:1px solid var(--line);font-size:14px;transition:all .15s}
+.chip:hover{border-color:#454a86}
+.chip[aria-pressed=true]{background:rgba(255,184,77,.14);border-color:var(--brass);color:var(--brass)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.row label{display:grid;gap:6px;font-size:14px;color:var(--muted)}
+.row .field{width:130px}
+
+/* ticket: คีย์ที่เพิ่งสร้าง */
+.tickets{display:grid;gap:12px;margin-top:20px}
+.ticket{position:relative;display:flex;align-items:stretch;border-radius:16px;overflow:hidden;
+  background:linear-gradient(135deg,#ffcb73,var(--brass) 45%,var(--ember));color:#2a1604;
+  animation:pop .45s cubic-bezier(.2,1.2,.4,1)}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+.ticket::before,.ticket::after{content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:var(--panel);left:calc(100% - 139px);}
+.ticket::before{top:-11px}.ticket::after{bottom:-11px}
+.ticket .body{flex:1;padding:18px 22px;min-width:0}
+.ticket .k{font-family:'JetBrains Mono';font-weight:600;font-size:clamp(17px,3.4vw,24px);letter-spacing:1.5px;word-break:break-all}
+.ticket .d{font-size:14px;opacity:.75;margin-top:2px}
+.ticket .stub{width:128px;border-left:2px dashed rgba(42,22,4,.4);display:grid;place-items:center;padding:10px}
+.ticket .stub .btn{background:rgba(42,22,4,.9);color:var(--brass);padding:9px 14px;font-size:14px}
+
+/* script box */
+.code{margin-top:14px;background:var(--ink);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;
+  font-size:13px;overflow-x:auto;white-space:pre;color:#cfd3f0}
+.code .c{color:var(--mint)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+/* keys table */
+.tbl{width:100%;border-collapse:collapse;margin-top:14px}
+.tbl th{text-align:left;font-weight:400;color:var(--muted);font-size:13px;padding:8px 10px;border-bottom:1px solid var(--line)}
+.tbl td{padding:12px 10px;border-bottom:1px solid rgba(42,46,87,.6);font-size:14px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .key{font-family:'JetBrains Mono';font-weight:500;font-size:13.5px;letter-spacing:.5px;white-space:nowrap}
+.badge{display:inline-block;padding:3px 11px;border-radius:999px;font-size:12.5px;font-weight:500;white-space:nowrap}
+.b-active{background:rgba(61,219,176,.14);color:var(--mint)}
+.b-unused{background:rgba(110,168,255,.14);color:var(--sky)}
+.b-expired{background:rgba(255,99,110,.14);color:var(--rose)}
+.scroll{overflow-x:auto}
+.icon-btn{padding:6px 9px;border-radius:8px;color:var(--muted);font-size:14px}
+.icon-btn:hover{background:var(--panel2);color:var(--text)}
+.icon-btn.del:hover{color:var(--rose)}
+
+/* modal + toast */
+.overlay{position:fixed;inset:0;background:rgba(5,6,14,.7);backdrop-filter:blur(5px);display:grid;place-items:center;padding:20px;z-index:50;animation:fade .15s}
+@keyframes fade{from{opacity:0}}
+.modal{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:26px;animation:pop .25s}
+.modal h2{margin-bottom:16px}
+.modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+#toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:99;width:max-content;max-width:92vw}
+.toast{padding:11px 18px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:pop .25s}
+.toast.bad{border-color:rgba(255,99,110,.5);color:var(--rose)}
+.toast.good{border-color:rgba(61,219,176,.5)}
+
+@media (max-width:640px){
+  .shell{padding:20px 14px 70px}.panel{padding:20px}.head h1{font-size:25px}
+  .hide-m{display:none}
+  .ticket::before,.ticket::after{left:calc(100% - 119px)}.ticket .stub{width:108px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="shell" id="app"></div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+const $app = document.getElementById('app');
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = (t) => t ? new Date(t).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }) : '-';
+const state = { apis: [], presetDays: 30 };
+
+/* ---------- helpers ---------- */
+async function api(path, { method = 'GET', body } = {}) {
+  const r = await fetch('/api/' + path, {
+    method, credentials: 'same-origin',
+    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && path !== 'auth') { renderLogin(); throw new Error('กรุณาเข้าสู่ระบบ'); }
+  if (!r.ok) throw new Error(j.error || 'เกิดข้อผิดพลาด');
+  return j;
+}
+function toast(msg, type = 'good') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + type; el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 2800);
+}
+async function copy(text, msg = 'คัดลอกแล้ว') {
+  try { await navigator.clipboard.writeText(text); }
+  catch { const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
+  toast(msg);
+}
+function modal({ title, body, confirm = 'ตกลง', danger = false, onSubmit }) {
+  const o = document.createElement('div');
+  o.className = 'overlay';
+  o.innerHTML = `<form class="modal"><h2>${esc(title)}</h2>${body}
+    <div class="btns"><button type="button" class="btn btn-ghost" data-x>ยกเลิก</button>
+    <button class="btn ${danger ? 'btn-danger' : 'btn-primary'}">${esc(confirm)}</button></div></form>`;
+  document.body.appendChild(o);
+  const close = () => o.remove();
+  o.addEventListener('click', (e) => { if (e.target === o || e.target.dataset.x !== undefined) close(); });
+  o.querySelector('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = o.querySelector('.btn:last-child'); btn.disabled = true;
+    try { await onSubmit(o); close(); } catch (err) { toast(err.message, 'bad'); btn.disabled = false; }
+  });
+  const f = o.querySelector('input'); if (f) { f.focus(); f.select(); }
+}
+const daysText = (k) => k.state === 'expired' ? 'หมดอายุแล้ว'
+  : k.state === 'unused' ? `${k.days} วัน (ยังไม่เริ่มนับ)`
+  : k.days_left <= 1 ? `${k.hours_left} ชั่วโมง` : `${k.days_left} วัน`;
+const badge = (s) => ({
+  active: '<span class="badge b-active">ใช้งานอยู่</span>',
+  unused: '<span class="badge b-unused">ยังไม่ถูกใช้</span>',
+  expired: '<span class="badge b-expired">หมดอายุ</span>',
+}[s]);
+
+/* ---------- login ---------- */
+function renderLogin() {
+  $app.innerHTML = `
+  <div class="login"><div class="panel">
+    <div class="brand"><i>🔑</i>Key Vault</div>
+    <p class="sub">เข้าสู่ระบบเพื่อจัดการ API และคีย์ของคุณ</p>
+    <form id="lf">
+      <input class="field" type="password" id="pw" placeholder="รหัสผ่านผู้ดูแล" autocomplete="current-password" required>
+      <div class="err" id="le"></div>
+      <button class="btn btn-primary">เข้าสู่ระบบ</button>
+    </form>
+  </div></div>`;
+  const pw = document.getElementById('pw'); pw.focus();
+  document.getElementById('lf').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button'); btn.disabled = true;
+    try { await api('auth', { method: 'POST', body: { password: pw.value } }); route(); }
+    catch (err) { document.getElementById('le').textContent = err.message; btn.disabled = false; }
+  };
+}
+async function logout() { await api('auth', { method: 'DELETE' }); renderLogin(); }
+const topbar = () => `<div class="top"><a class="brand" href="#/"><i>🔑</i>Key Vault</a>
+  <button class="btn btn-ghost btn-sm" data-act="logout">ออกจากระบบ</button></div>`;
+
+/* ---------- API list ---------- */
+async function renderList() {
+  $app.innerHTML = topbar() + '<p class="sub">กำลังโหลด...</p>';
+  const { apis } = await api('apis');
+  state.apis = apis;
+  $app.innerHTML = topbar() + `
+  <div class="head">
+    <div><h1>API ของฉัน</h1><p class="sub">สร้าง API หนึ่งตัวต่อหนึ่งสคริปต์ แล้วเข้าไปสร้างคีย์ในแต่ละ API</p></div>
+    <button class="btn btn-primary" data-act="new-api">+ สร้าง API</button>
+  </div>
+  ${apis.length ? `<div class="grid">${apis.map((a) => `
+    <a class="tag" href="#/api/${esc(a.id)}">
+      <h3>${esc(a.name)}</h3><div class="id mono">${esc(a.id)}</div>
+      <div class="meta"><span><b>${a.keyCount}</b> คีย์</span><span>${new Date(a.createdAt).toLocaleDateString('th-TH',{dateStyle:'medium'})}</span></div>
+    </a>`).join('')}</div>`
+  : `<div class="empty"><h3>ยังไม่มี API</h3><p class="sub">ตั้งชื่อ API แรกของคุณ เช่น ชื่อสคริปต์หรือชื่อเกม</p>
+     <button class="btn btn-primary" data-act="new-api">สร้าง API แรก</button></div>`}`;
+}
+function newApiModal() {
+  modal({
+    title: 'สร้าง API', confirm: 'สร้าง API',
+    body: '<input class="field" name="n" maxlength="40" placeholder="ชื่อ API เช่น Blox Fruits Hub" required>',
+    onSubmit: async (o) => {
+      const { api: a } = await api('apis', { method: 'POST', body: { name: o.querySelector('[name=n]').value } });
+      toast('สร้าง API แล้ว'); location.hash = '#/api/' + a.id;
+    },
+  });
+}
+
+/* ---------- API detail ---------- */
+async function renderDetail(id, fresh = []) {
+  const { api: a, keys } = await api('keys?apiId=' + encodeURIComponent(id));
+  const sc = (s) => keys.filter((k) => k.state === s).length;
+  const oneLiner = `loadstring(game:HttpGet("${location.origin}/api/loader?api=${a.id}"))()`;
+  const presets = [1, 3, 7, 15, 30, 90, 365];
+
+  $app.innerHTML = topbar() + `
+  <a class="crumb" href="#/">← API ทั้งหมด</a>
+  <div class="head">
+    <div><h1>${esc(a.name)}</h1><p class="sub">API ID: <span class="mono">${esc(a.id)}</span></p></div>
+    <div class="actions" style="margin:0">
+      <button class="btn btn-ghost btn-sm" data-act="rename">เปลี่ยนชื่อ</button>
+      <button class="btn btn-danger btn-sm" data-act="del-api">ลบ API</button>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>${keys.length}</b><span>คีย์ทั้งหมด</span></div>
+    <div class="stat"><b style="color:var(--mint)">${sc('active')}</b><span>ใช้งานอยู่</span></div>
+    <div class="stat"><b style="color:var(--sky)">${sc('unused')}</b><span>ยังไม่ถูกใช้</span></div>
+    <div class="stat"><b style="color:var(--rose)">${sc('expired')}</b><span>หมดอายุ</span></div>
+  </div>
+
+  <div class="panel" style="margin-top:22px">
+    <h2>สร้างคีย์</h2>
+    <p class="sub">เลือกอายุคีย์ แล้วกดสร้าง ระบบจะเริ่มนับวันตอนที่คีย์ถูกใช้ครั้งแรก</p>
+    <div class="gen">
+      <div class="chips" id="chips">${presets.map((d) =>
+        `<button class="chip" aria-pressed="${d === state.presetDays}" data-days="${d}">${d} วัน</button>`).join('')}</div>
+      <div class="row">
+        <label>จำนวนวัน<input class="field" id="days" type="number" min="1" max="36500" value="${state.presetDays}"></label>
+        <label>จำนวนคีย์<input class="field" id="count" type="number" min="1" max="50" value="1"></label>
+        <button class="btn btn-primary" data-act="gen">สร้างคีย์</button>
+      </div>
+    </div>
+    <div class="tickets" id="tickets">${fresh.map(ticket).join('')}</div>
+  </div>
+
+  <div class="panel">
+    <h2>สคริปต์สำหรับ Roblox</h2>
+    <p class="sub">วางในตัว Executor สคริปต์นี้จะแสดงหน้าต่างใส่คีย์ ตรวจคีย์ และบอกว่าเหลือกี่วัน</p>
+    <div class="code mono">${esc(oneLiner)}</div>
+    <div class="actions">
+      <button class="btn btn-primary btn-sm" data-act="copy-one" data-v="${esc(oneLiner)}">คัดลอกสคริปต์</button>
+      <button class="btn btn-ghost btn-sm" data-act="copy-full">คัดลอกสคริปต์เต็ม (Lua)</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>คีย์ทั้งหมด</h2>
+    ${keys.length ? `<div class="scroll"><table class="tbl"><thead><tr>
+      <th>คีย์</th><th>สถานะ</th><th>เหลือ</th><th class="hide-m">หมดอายุเมื่อ</th><th></th></tr></thead><tbody>
+      ${keys.map((k) => `<tr>
+        <td class="key">${esc(k.key)}</td><td>${badge(k.state)}</td><td>${esc(daysText(k))}</td>
+        <td class="hide-m">${k.expiresAt ? fmt(k.expiresAt) : '-'}</td>
+        <td style="text-align:right;white-space:nowrap">
+          <button class="icon-btn" title="คัดลอก" data-act="copy" data-v="${esc(k.key)}">คัดลอก</button>
+          <button class="icon-btn del" title="ลบ" data-act="del-key" data-v="${esc(k.key)}">ลบ</button></td></tr>`).join('')}
+      </tbody></table></div>`
+    : '<p class="sub" style="margin-top:12px">ยังไม่มีคีย์ใน API นี้ ลองสร้างคีย์ด้านบนได้เลย</p>'}
+  </div>`;
+  state.cur = a;
+}
+const ticket = (k) => `<div class="ticket"><div class="body"><div class="k">${esc(k.key)}</div>
+  <div class="d">อายุ ${k.days} วัน • เริ่มนับเมื่อใช้ครั้งแรก</div></div>
+  <div class="stub"><button class="btn" data-act="copy" data-v="${esc(k.key)}">คัดลอก</button></div></div>`;
+
+/* ---------- events ---------- */
+document.addEventListener('click', async (e) => {
+  const chip = e.target.closest('.chip');
+  if (chip) {
+    state.presetDays = Number(chip.dataset.days);
+    document.getElementById('days').value = state.presetDays;
+    document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', c === chip));
+    return;
+  }
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const act = el.dataset.act, v = el.dataset.v;
+  try {
+    if (act === 'logout') return logout();
+    if (act === 'new-api') return newApiModal();
+    if (act === 'copy' || act === 'copy-one') return copy(v, act === 'copy' ? 'คัดลอกคีย์แล้ว' : 'คัดลอกสคริปต์แล้ว');
+    if (act === 'copy-full') {
+      const r = await fetch('/api/loader?api=' + state.cur.id); return copy(await r.text(), 'คัดลอกสคริปต์เต็มแล้ว');
+    }
+    if (act === 'gen') {
+      el.disabled = true;
+      try {
+        const { keys } = await api('keys', { method: 'POST', body: {
+          apiId: state.cur.id, days: document.getElementById('days').value, count: document.getElementById('count').value } });
+        toast(`สร้างคีย์แล้ว ${keys.length} อัน`);
+        await renderDetail(state.cur.id, keys);
+      } finally { el.disabled = false; }
+      return;
+    }
+    if (act === 'del-key') {
+      return modal({ title: 'ลบคีย์นี้?', danger: true, confirm: 'ลบคีย์',
+        body: `<p class="sub mono">${esc(v)}</p><p class="sub" style="margin-top:8px">คีย์จะใช้งานไม่ได้ทันที</p>`,
+        onSubmit: async () => { await api('keys?key=' + encodeURIComponent(v), { method: 'DELETE' }); toast('ลบคีย์แล้ว'); renderDetail(state.cur.id); } });
+    }
+    if (act === 'rename') {
+      return modal({ title: 'เปลี่ยนชื่อ API', confirm: 'บันทึก',
+        body: `<input class="field" name="n" maxlength="40" value="${esc(state.cur.name)}" required>`,
+        onSubmit: async (o) => { await api('apis', { method: 'PATCH', body: { id: state.cur.id, name: o.querySelector('[name=n]').value } }); toast('บันทึกแล้ว'); renderDetail(state.cur.id); } });
+    }
+    if (act === 'del-api') {
+      return modal({ title: `ลบ "${state.cur.name}"?`, danger: true, confirm: 'ลบ API',
+        body: '<p class="sub">คีย์ทั้งหมดใน API นี้จะถูกลบด้วย และไม่สามารถกู้คืนได้</p>',
+        onSubmit: async () => { await api('apis?id=' + state.cur.id, { method: 'DELETE' }); toast('ลบ API แล้ว'); location.hash = '#/'; } });
+    }
+  } catch (err) { toast(err.message, 'bad'); }
+});
+
+/* ---------- router ---------- */
+async function route() {
+  try {
+    const me = await api('auth');
+    if (!me.authed) return renderLogin();
+    const m = location.hash.match(/^#\/api\/([a-f0-9]+)/);
+    if (m) await renderDetail(m[1]); else await renderList();
+  } catch (err) { if (err.message !== 'กรุณาเข้าสู่ระบบ') $app.innerHTML = `<div class="panel"><h2>เกิดข้อผิดพลาด</h2><p class="err">${esc(err.message)}</p></div>`; }
+}
+addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>
